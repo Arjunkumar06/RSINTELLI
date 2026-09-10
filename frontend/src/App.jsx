@@ -27,7 +27,9 @@ import {
 } from 'lucide-react';
 import LandingPage from './LandingPage';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://127.0.0.1:8000'
+  : '';
 const CONCEPT_DEMO_ID = 'concept_demo';
 const DEMO_WIDTH = 320;
 const DEMO_HEIGHT = 240;

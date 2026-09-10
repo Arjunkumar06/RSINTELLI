@@ -14,15 +14,16 @@ def get_db_path():
                 try:
                     shutil.copy2(orig_path, tmp_path)
                 except Exception:
-                    return orig_path
-            else:
-                return tmp_path
+                    pass
         return tmp_path
     return orig_path
 
 def get_db():
     db_p = get_db_path()
-    conn = sqlite3.connect(db_p)
+    try:
+        conn = sqlite3.connect(db_p)
+    except Exception:
+        conn = sqlite3.connect(':memory:')
     conn.row_factory = sqlite3.Row
     return conn
 

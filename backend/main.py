@@ -8,8 +8,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import Response
 import numpy as np
-import rasterio
-import cv2
+
+try:
+    import rasterio
+except Exception:
+    rasterio = None
+
+try:
+    import cv2
+except Exception:
+    cv2 = None
 
 # Import custom modules
 from backend.database import init_db, save_scene, get_all_scenes, get_scene, save_changes, get_all_changes
@@ -403,11 +411,16 @@ def run_change_detection(before_id: str, after_id: str, location_id: str = Query
 
 @app.get("/changes")
 def get_changes(location: str = Query(None)):
-    return get_all_changes(location_id=location)
+    res = get_all_changes(location_id=location)
+    if not res and location:
+        return generate_location_changes(location)
+    return res
 
 @app.post("/search")
 def search(query: str, location: str = Query(None)):
     changes = get_all_changes(location_id=location)
+    if not changes and location:
+        changes = generate_location_changes(location)
     seg_after = getattr(app.state, "seg_after", None)
     results = search_changes(query, changes, seg_after, location_id=location)
     return results

@@ -1,8 +1,21 @@
 import numpy as np
-import cv2
 import math
-from shapely.geometry import Polygon, mapping
-import rasterio
+
+try:
+    import cv2
+except Exception:
+    cv2 = None
+
+try:
+    from shapely.geometry import Polygon, mapping
+except Exception:
+    Polygon = None
+    mapping = None
+
+try:
+    import rasterio
+except Exception:
+    rasterio = None
 
 # Change Type Mapping based on transitions
 # Class IDs: 0: Bare land, 1: Vegetation, 2: Water, 3: Road, 4: Building

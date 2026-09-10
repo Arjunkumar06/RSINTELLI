@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/(locations|scenes|changes|search|export|change-detect|docs|openapi.json|static/.*)",
+      "source": "/(locations|scenes|changes|search|export|change-detect|docs|health|openapi.json|api/.*|static/.*)",
       "destination": "/backend/main.py"
     }
   ]
