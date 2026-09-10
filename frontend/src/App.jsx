@@ -22,7 +22,8 @@ import {
   Sparkles,
   Info,
   ArrowLeft,
-  MapPin
+  MapPin,
+  Satellite
 } from 'lucide-react';
 import LandingPage from './LandingPage';
 
@@ -46,7 +47,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('DRISHTI Workstation Error Boundary caught an exception:', error, errorInfo);
+    console.error('RSINTELLI Workstation Error Boundary caught an exception:', error, errorInfo);
   }
 
   render() {
@@ -111,26 +112,12 @@ const getCategoryColor = (type) => {
 
 const ALL_CAT_IDS = ['roads', 'construction', 'water', 'vegetation'];
 
-function MoDLogo() {
-  const [imgError, setImgError] = useState(false);
-
-  if (imgError) {
-    return (
-      <img 
-        src="/Ministry_of_Defence_India.png" 
-        alt="Ministry of Defence India" 
-        className="mod-header-logo-img png-fallback" 
-      />
-    );
-  }
-
+function RSIntelliLogo() {
   return (
-    <img 
-      src="/Ministry_of_Defence_India.svg" 
-      alt="Ministry of Defence India" 
-      className="mod-header-logo-img" 
-      onError={() => setImgError(true)}
-    />
+    <div className="rsintelli-logo-badge">
+      <img src="/rsintelli_logo.svg" alt="RSINTELLI Satellite Emblem" style={{ width: 26, height: 26 }} />
+      <span className="rsintelli-live-pulse" title="24/7 Satellite Telemetry Active" />
+    </div>
   );
 }
 
@@ -334,6 +321,27 @@ function AppContent() {
 
   // User analysis execution state (default false on initial load)
   const [hasUserRunAnalysis, setHasUserRunAnalysis] = useState(false);
+
+  // RSINTELLI 24/7 System States
+  const [spectralMode, setSpectralMode] = useState('RGB'); // RGB, NDVI, NDWI, NDBI
+  const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [utcTime, setUtcTime] = useState('');
+  const [activeAlerts] = useState([
+    { id: 'alt-1', title: 'CRITICAL: Brahmaputra Riverbank Erosion Shift', loc: 'Guwahati Fluvial Zone', severity: 'CRITICAL', area: '14,800 m²', coords: [26.1824, 91.7512], time: '12m ago' },
+    { id: 'alt-2', title: 'WARNING: Forest Cover Loss Detected', loc: 'Nameri National Reserve AOI', severity: 'WARNING', area: '9,250 m²', coords: [27.0210, 92.7845], time: '28m ago' },
+    { id: 'alt-3', title: 'INFO: Rapid Construction Groundwork', loc: 'VIT AP Campus Zone AOI', severity: 'INFO', area: '4,600 m²', coords: [16.5124, 80.5211], time: '1h ago' },
+    { id: 'alt-4', title: 'WARNING: Riverbed Sediment Dynamics', loc: 'Majuli Island AOI', severity: 'WARNING', area: '18,400 m²', coords: [26.9500, 94.1800], time: '2h ago' }
+  ]);
+
+  useEffect(() => {
+    const updateClock = () => {
+      const now = new Date();
+      setUtcTime(now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC');
+    };
+    updateClock();
+    const timer = setInterval(updateClock, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const isCategoryChecked = (catId) => {
     if (catId === 'all') {
@@ -763,18 +771,43 @@ function AppContent() {
           </button>
 
           <div className="logo-section">
-            <MoDLogo />
+            <RSIntelliLogo />
             <div>
-              <span className="logo-title">DRISHTI</span>
-              <span className="logo-subtitle" style={{ marginLeft: 8 }}>Satellite Intelligence Workstation</span>
+              <span className="logo-title">RSINTELLI</span>
+              <span className="logo-subtitle" style={{ marginLeft: 8 }}>24/7 Satellite Intelligence Station</span>
             </div>
           </div>
         </div>
 
         <div className="header-right">
+          {/* Spectral Mode Composite Selector */}
+          <div className="spectral-bar" title="Multi-Spectral Band Mode">
+            <span style={{ fontSize: '0.62rem', color: '#64748b', paddingLeft: 6, fontWeight: 700 }}>BAND:</span>
+            {['RGB', 'NDVI', 'NDWI', 'NDBI'].map((mode) => (
+              <button
+                key={mode}
+                className={`spectral-btn ${spectralMode === mode ? 'active' : ''}`}
+                onClick={() => setSpectralMode(mode)}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+
+          {/* 24/7 Alert Drawer Trigger */}
+          <button 
+            className="alert-trigger-btn"
+            onClick={() => setIsAlertsOpen(!isAlertsOpen)}
+            title="24/7 Live Anomaly Alerts"
+          >
+            <AlertCircle size={14} />
+            <span>ALERTS</span>
+            <span className="alert-count-badge">{activeAlerts.length}</span>
+          </button>
+
           <div className="health-pill">
-            <span className="health-pulse-dot" />
-            <span>SYSTEM ONLINE</span>
+            <span className="rsintelli-live-pulse" />
+            <span>24/7 MONITOR ACTIVE</span>
           </div>
 
           {(pipelineResult || changes.length > 0) && (
@@ -796,6 +829,76 @@ function AppContent() {
         </div>
       </header>
 
+      {/* 24/7 Top Telemetry Bar */}
+      <div className="rsintelli-telemetry-bar">
+        <div className="telemetry-item">
+          <span className="rsintelli-live-pulse" />
+          <span className="telemetry-label">STREAM:</span>
+          <span className="telemetry-val highlight">LIVE 24/7 CONTINUOUS</span>
+        </div>
+        <div className="telemetry-item">
+          <span className="telemetry-label">UTC TIME:</span>
+          <span className="telemetry-val">{utcTime || '2026-09-11 01:43:00 UTC'}</span>
+        </div>
+        <div className="telemetry-item">
+          <span className="telemetry-label">SATELLITE:</span>
+          <span className="telemetry-val">Sentinel-2A / RSIntelli-Sat-1</span>
+        </div>
+        <div className="telemetry-item">
+          <span className="telemetry-label">ORBIT HEIGHT:</span>
+          <span className="telemetry-val">786 km (Sun-Sync)</span>
+        </div>
+        <div className="telemetry-item">
+          <span className="telemetry-label">SENSOR RESOLUTION:</span>
+          <span className="telemetry-val">10m / px Multi-Spectral</span>
+        </div>
+        <div className="telemetry-item">
+          <span className="telemetry-label">COMPOSITE MODE:</span>
+          <span className="telemetry-val highlight">{spectralMode} SPECTRAL</span>
+        </div>
+      </div>
+
+      {/* 24/7 Anomaly Alert Drawer Modal */}
+      {isAlertsOpen && (
+        <div className="alert-drawer-modal">
+          <div className="alert-drawer-header">
+            <span className="alert-drawer-title">
+              <AlertCircle size={16} />
+              <span>24/7 LIVE ANOMALY FEED</span>
+            </span>
+            <button 
+              onClick={() => setIsAlertsOpen(false)}
+              style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+          <div className="alert-drawer-body">
+            {activeAlerts.map(alt => (
+              <div 
+                key={alt.id} 
+                className="alert-item-card"
+                onClick={() => {
+                  setMapCenter(alt.coords);
+                  setMapZoom(15);
+                  setIsAlertsOpen(false);
+                }}
+              >
+                <div className="alert-item-top">
+                  <span className={`alert-severity-tag ${alt.severity}`}>{alt.severity}</span>
+                  <span style={{ fontSize: '0.62rem', color: '#64748b' }}>{alt.time}</span>
+                </div>
+                <div className="alert-item-title">{alt.title}</div>
+                <div className="alert-item-meta">
+                  <span>📍 {alt.loc}</span>
+                  <span>📐 {alt.area}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Main Workstation Layout */}
       <div className="workstation-flex-layout">
         
@@ -814,9 +917,8 @@ function AppContent() {
           <div className="sidebar-section">
             <div className="sidebar-section-title">Filters</div>
 
-            {/* Location Selector */}
             <div className="filter-group">
-              <label className="filter-label">Target Location / AOI</label>
+              <label className="filter-label">Target Location / AOI (25+ Indian Places)</label>
               <div className="location-select-container" ref={locationDropdownRef}>
                 <div
                   className="location-search-container"
@@ -830,15 +932,19 @@ function AppContent() {
                       setLocationDropdownOpen(true);
                     }}
                     onFocus={() => setLocationDropdownOpen(true)}
-                    placeholder="Find location..."
+                    placeholder="Search 25+ Indian locations (Delhi, Mumbai, Bengaluru, Chennai)..."
                   />
                   <ChevronDown size={12} />
                 </div>
 
                 {locationDropdownOpen && (
                   <div className="location-dropdown">
+                    <div style={{ padding: '6px 10px', fontSize: '0.64rem', fontWeight: 700, color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>SELECT INDIAN OBSERVATION AOI</span>
+                      <span style={{ background: '#38bdf8', color: '#030712', padding: '1px 5px', borderRadius: 4, fontWeight: 800 }}>{locationMatches.length} PLACES</span>
+                    </div>
                     {locationMatches.length === 0 ? (
-                      <div style={{ padding: 8, fontSize: '0.72rem', color: '#666' }}>No location found.</div>
+                      <div style={{ padding: 12, fontSize: '0.72rem', color: '#888', textAlign: 'center' }}>No location matching "{locationQuery}".</div>
                     ) : (
                       locationMatches.map(loc => loc && (
                         <div
@@ -850,10 +956,10 @@ function AppContent() {
                             setLocationDropdownOpen(false);
                           }}
                         >
-                          <MapPin size={13} style={{ color: selectedLocId === loc.location_id ? 'var(--accent-cyan)' : 'var(--text-muted)', flexShrink: 0 }} />
+                          <span style={{ fontSize: '1rem', flexShrink: 0 }}>{loc.badge_icon || '📍'}</span>
                           <div>
                             <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#f5f5f5' }}>{loc.name || loc.location_id}</div>
-                            <div style={{ fontSize: '0.62rem', color: '#a0a0a0' }}>{loc.category || 'Observation Zone'}</div>
+                            <div style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{loc.category || 'Observation Zone'} {loc.reference_scene?.date ? `• Ref: ${loc.reference_scene.date}` : ''}</div>
                           </div>
                         </div>
                       ))
@@ -1047,7 +1153,7 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="map-container-box">
+            <div className={`map-container-box spectral-filter-${spectralMode}`}>
               {!hasLocationSelected ? (
                 <div className="map-placeholder no-aoi-placeholder">
                   <Crosshair size={28} style={{ color: '#404040', marginBottom: 12 }} />
@@ -1172,7 +1278,7 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="map-container-box">
+            <div className={`map-container-box spectral-filter-${spectralMode}`}>
               {!hasLocationSelected ? (
                 <div className="map-placeholder no-aoi-placeholder">
                   <Crosshair size={28} style={{ color: '#404040', marginBottom: 12 }} />

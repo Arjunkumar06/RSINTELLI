@@ -17,7 +17,9 @@ import {
   GraduationCap,
   Sparkles,
   Satellite,
-  Cpu
+  Cpu,
+  Search,
+  X
 } from 'lucide-react';
 
 /* ──────────────────────────────────────────────
@@ -129,17 +131,14 @@ function StarfieldCanvas() {
 }
 
 /* ──────────────────────────────────────────────
-   MoD Logo
+   RSINTELLI Logo
 ─────────────────────────────────────────────── */
-function MoDLogoHero() {
-  const [imgError, setImgError] = useState(false);
+function RSIntelliLogoHero() {
   return (
-    <img
-      src={imgError ? '/Ministry_of_Defence_India.png' : '/Ministry_of_Defence_India.svg'}
-      alt="Ministry of Defence India"
-      className="mod-header-logo-img"
-      onError={() => setImgError(true)}
-    />
+    <div className="rsintelli-logo-badge">
+      <img src="/rsintelli_logo.svg" alt="RSINTELLI Satellite Emblem" style={{ width: 28, height: 28 }} />
+      <span className="rsintelli-live-pulse" title="24/7 Orbital Monitor Active" />
+    </div>
   );
 }
 
@@ -390,6 +389,7 @@ function Globe3DCanvas() {
 ─────────────────────────────────────────────── */
 export default function LandingPage({ onLaunchWorkstation, onSelectAOI, locations = [] }) {
   const [scrolled, setScrolled] = useState(false);
+  const [lpSearchQuery, setLpSearchQuery] = useState('');
 
   useEffect(() => {
     const container = document.getElementById('landing-scroll-root');
@@ -401,14 +401,34 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
     return () => container.removeEventListener('scroll', handler);
   }, []);
 
-  const aoiCards = [
-    { id: 'mixed', icon: <Globe size={18} style={{ color: '#38bdf8' }} />, cat: 'MIXED LANDSCAPE', title: 'Guwahati Urban & River Basin', desc: 'Multi-category change monitoring across riverbanks, urban growth, and green cover.', stats: '14 Change Events', range: '2024-03-11 → 2026-03-06' },
-    { id: 'forest', icon: <Trees size={18} style={{ color: '#4ade80' }} />, cat: 'VEGETATION LOSS', title: 'Kaziranga Reserve Forest', desc: 'Illegal timber clearing and forest boundary encroachment detection.', stats: '8 Clearing Polygons', range: '2024-02-10 → 2026-03-06' },
-    { id: 'river', icon: <Droplets size={18} style={{ color: '#60a5fa' }} />, cat: 'WATER EXTENT SHIFT', title: 'Majuli Brahmaputra River', desc: 'Riverbank erosion, channel migration, and flood extent monitoring.', stats: '6 Water Shift Zones', range: '2023-01-21 → 2026-03-06' },
-    { id: 'urban', icon: <Building2 size={18} style={{ color: '#f59e0b' }} />, cat: 'NEW CONSTRUCTION', title: 'Guwahati Urban Expansion', desc: 'Rapid building construction, industrial expansion, and road development.', stats: '11 Infrastructure Polygons', range: '2024-02-10 → 2026-03-06' },
-    { id: 'vit_ap', icon: <GraduationCap size={18} style={{ color: '#a78bfa' }} />, cat: 'INFRASTRUCTURE', title: 'VIT-AP Campus AOI', desc: 'High-resolution multi-temporal analysis of university campus growth.', stats: '7 Construction Changes', range: '2021-03-06 → 2026-03-05' },
-    { id: 'concept_demo', icon: <Sparkles size={18} style={{ color: '#f43f5e' }} />, cat: 'CONCEPT DEMO', title: 'Synthetic Benchmark', desc: 'Lightweight synthetic benchmark for change detection algorithms.', stats: '4 Synthetic Changes', range: '2024-02-10 → 2024-10-22' },
+  const rawLocations = Array.isArray(locations) && locations.length > 0 ? locations : [
+    { location_id: 'vit_ap', name: 'VIT-AP University, Amaravati', category: 'NEW CONSTRUCTION', badge_icon: '🏫', description: 'Campus growth and land cover change monitoring.', reference_scene: { date: '2021-03-06' }, target_scene: { date: '2026-03-05' } },
+    { location_id: 'forest', name: 'Garbhanga Forest Reserve, Assam', category: 'VEGETATION LOSS', badge_icon: '🌲', description: 'Reserve forest canopy loss & clearing detection.', reference_scene: { date: '2024-02-10' }, target_scene: { date: '2026-03-06' } },
+    { location_id: 'river', name: 'Brahmaputra River, Assam', category: 'WATER EXTENT CHANGE', badge_icon: '🌊', description: 'Riverbank erosion and channel migration monitoring.', reference_scene: { date: '2024-02-10' }, target_scene: { date: '2024-10-22' } },
+    { location_id: 'urban', name: 'Dispur Metropolis, Assam', category: 'NEW CONSTRUCTION', badge_icon: '🏢', description: 'Metropolitan built-up and infrastructure expansion.', reference_scene: { date: '2024-02-10' }, target_scene: { date: '2026-03-06' } },
+    { location_id: 'mixed', name: 'Guwahati City Core, Assam', category: 'MIXED CHANGE', badge_icon: '🌍', description: 'Integrated urban, forest, and riverfront landscape.', reference_scene: { date: '2024-03-11' }, target_scene: { date: '2026-03-06' } },
+    { location_id: 'wetland', name: 'Deepor Beel Ramsar Wetland, Assam', category: 'WATER EXTENT CHANGE', badge_icon: '🌿', description: 'Ramsar wetland water area and vegetation shift.', reference_scene: { date: '2024-02-10' }, target_scene: { date: '2025-02-09' } }
   ];
+
+  const aoiCards = rawLocations.map((loc) => ({
+    id: loc.location_id,
+    icon: <span style={{ fontSize: '1.2rem' }}>{loc.badge_icon || '📍'}</span>,
+    cat: loc.category || 'OBSERVATION ZONE',
+    title: loc.name || loc.location_id,
+    desc: loc.description || 'Multi-temporal satellite change observation area.',
+    stats: 'Verified Sentinel-2 Pass',
+    range: `${loc.reference_scene?.date || 'Historical'} → ${loc.target_scene?.date || '2026'}`
+  }));
+
+  const filteredAoiCards = aoiCards.filter((card) => {
+    const q = lpSearchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      card.title.toLowerCase().includes(q) ||
+      card.cat.toLowerCase().includes(q) ||
+      card.desc.toLowerCase().includes(q)
+    );
+  });
 
   const caps = [
     { icon: <Compass size={20} />, title: 'Geospatial Alignment', desc: 'ORB feature homography for automatic sub-pixel satellite pass alignment without manual GCPs.', tag: 'ORB HOMOGRAPHY' },
@@ -428,8 +448,9 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
         {/* ── NAV ── */}
         <nav className={`lp-nav ${scrolled ? 'lp-nav--scrolled' : ''}`}>
           <div className="lp-nav-brand">
-            <MoDLogoHero />
-            <span className="lp-brand-name">DRISHTI</span>
+            <RSIntelliLogoHero />
+            <span className="lp-brand-name">RSINTELLI</span>
+            <span className="lp-live-tag"><span className="rsintelli-live-dot" /> 24/7 MONITOR</span>
           </div>
 
           <div className="lp-nav-links">
@@ -440,7 +461,7 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           </div>
 
           <button className="lp-contact-btn" onClick={onLaunchWorkstation}>
-            Get Started
+            Launch Station
           </button>
         </nav>
 
@@ -455,17 +476,17 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           <div className="lp-hero-content">
             <h1 className="lp-hero-title">
               Redefining Satellite<br />
-              Intelligence for&nbsp;
-              <span className="lp-title-accent">Defence</span>
+              Intelligence with&nbsp;
+              <span className="lp-title-accent">RSINTELLI 24/7</span>
             </h1>
 
             <p className="lp-hero-sub">
-              Multi-temporal Sentinel-2 change detection powered by AI homography &amp; semantic segmentation. Detect ground truth changes in real time.
+              Continuous 24/7 multi-temporal Sentinel-2 change detection powered by AI homography, multi-spectral band synthesis &amp; semantic segmentation.
             </p>
 
             <div className="lp-hero-ctas">
               <button className="lp-btn-primary" onClick={onLaunchWorkstation}>
-                Launch Workstation
+                Launch 24/7 Workstation
                 <ArrowRight size={16} />
               </button>
               <a className="lp-btn-ghost" href="#aois">
@@ -477,16 +498,16 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
 
         {/* ── PARTNERS TICKER ── */}
         <section className="lp-ticker-section">
-          <p className="lp-ticker-label">Sentinel-2 MSI Level-2A &nbsp;•&nbsp; ISRO SatCat &nbsp;•&nbsp; Copernicus EMS &nbsp;•&nbsp; Ministry of Defence &nbsp;•&nbsp; ESA Open Data</p>
+          <p className="lp-ticker-label">Sentinel-2 MSI Level-2A &nbsp;•&nbsp; ISRO SatCat &nbsp;•&nbsp; Copernicus EMS &nbsp;•&nbsp; RSINTELLI Constellation &nbsp;•&nbsp; ESA Open Data &nbsp;•&nbsp; 24/7 Continuous Feed</p>
         </section>
 
         {/* ── STATS RIBBON ── */}
         <section className="lp-stats-section">
           <div className="lp-stats-grid">
             {[
+              { val: '24 / 7', label: 'Continuous Monitoring', sub: 'Real-time telemetry stream' },
               { val: '100%', label: 'Automated GeoAlignment', sub: 'ORB homography' },
               { val: '99.4%', label: 'False-Change Suppression', sub: 'Cloud mask + spectral norm' },
-              { val: '6+', label: 'Strategic AOI Locations', sub: 'Forest, urban, river, infra' },
               { val: '< 1.2m', label: 'Spatial Precision', sub: 'Sentinel-2 10m resampled' },
             ].map(s => (
               <div key={s.val} className="lp-stat-card glass-card">
@@ -503,14 +524,14 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           <div className="lp-section-tag">OUR MISSION</div>
           <h2 className="lp-section-title">Building the Future of<br />Earth Observation</h2>
           <p className="lp-section-desc">
-            We are engineering the next generation of satellite intelligence — combining autonomous geospatial alignment, AI-driven semantic understanding, and defense-grade reporting workflows to deliver real-time actionable intelligence from orbital imagery.
+            We are engineering the next generation of satellite intelligence — combining autonomous geospatial alignment, AI-driven semantic understanding, and high-precision reporting workflows to deliver real-time actionable intelligence from orbital imagery.
           </p>
 
           <div className="lp-mission-cards">
             {[
               { icon: <Satellite size={24} style={{ color: '#38bdf8' }} />, title: 'Deep Orbital Intelligence', desc: 'Pushing boundaries with autonomous spacecraft imaging and multi-pass temporal analysis.' },
               { icon: <Cpu size={24} style={{ color: '#a78bfa' }} />, title: 'AI-Driven Analysis', desc: 'Neural segmentation and homography pipelines enabling real-time land-cover change quantification.' },
-              { icon: <ShieldCheck size={24} style={{ color: '#4ade80' }} />, title: 'Sustainable Intelligence', desc: 'Responsible Earth monitoring ensuring long-term sustainability of strategic observation programs.' },
+              { icon: <ShieldCheck size={24} style={{ color: '#4ade80' }} />, title: '24/7 Continuous Monitoring', desc: 'Non-stop Earth monitoring providing instant anomaly detection and threat reporting.' },
             ].map(c => (
               <div key={c.title} className="lp-mission-card glass-card">
                 <div className="lp-mission-icon">{c.icon}</div>
@@ -526,7 +547,7 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           <div className="lp-section-tag">LABS &amp; TECHNOLOGY</div>
           <h2 className="lp-section-title">Engineering the Future<br />of Space Exploration</h2>
           <p className="lp-section-desc">
-            Our labs bring together cutting-edge computer vision, satellite data pipelines, and intelligent verification systems to power next-generation defence earth observation.
+            Our labs bring together cutting-edge computer vision, satellite data pipelines, and intelligent verification systems to power next-generation 24/7 earth observation.
           </p>
 
           <div className="lp-caps-grid">
@@ -543,30 +564,54 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
 
         {/* ── STRATEGIC AOIS ── */}
         <section id="aois" className="lp-section">
-          <div className="lp-section-tag">STRATEGIC DEMONSTRATION SITES</div>
-          <h2 className="lp-section-title">Pre-Staged Observation<br />Locations</h2>
+          <div className="lp-section-tag">STRATEGIC DEMONSTRATION SITES ({rawLocations.length} PLACES)</div>
+          <h2 className="lp-section-title">Explore Indian Observation<br />Locations</h2>
           <p className="lp-section-desc">
-            Select any strategic AOI to launch the DRISHTI workstation pre-configured with multi-temporal Sentinel-2 imagery and existing change analysis.
+            Search or select any of the 25+ strategic Indian locations below to launch the RSINTELLI workstation pre-configured with historical ($T_1$) and current ($T_2$) Sentinel-2 imagery.
           </p>
 
-          <div className="lp-aoi-grid">
-            {aoiCards.map(a => (
-              <div key={a.id} className="lp-aoi-card glass-card" onClick={() => onSelectAOI(a.id)}>
-                <div className="lp-aoi-top">
-                  <span className="lp-aoi-icon">{a.icon}</span>
-                  <span className="lp-aoi-cat">{a.cat}</span>
-                </div>
-                <h3 className="lp-aoi-title">{a.title}</h3>
-                <p className="lp-aoi-desc">{a.desc}</p>
-                <div className="lp-aoi-meta">
-                  <span><MapPin size={11} /> {a.stats}</span>
-                  <span><Eye size={11} /> {a.range}</span>
-                </div>
-                <button className="lp-aoi-btn">
-                  Analyze AOI <ArrowRight size={13} />
+          {/* Interactive Search Bar for Landing Page */}
+          <div className="lp-aoi-search-wrapper">
+            <div className="lp-aoi-search-box">
+              <Search size={16} style={{ color: '#38bdf8' }} />
+              <input
+                type="text"
+                placeholder="Search 25+ Indian places (Delhi, Mumbai, Bengaluru, Chennai, Kaziranga, Ladakh, Ayodhya)..."
+                value={lpSearchQuery}
+                onChange={(e) => setLpSearchQuery(e.target.value)}
+              />
+              {lpSearchQuery && (
+                <button onClick={() => setLpSearchQuery('')} style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                  <X size={14} />
                 </button>
+              )}
+            </div>
+          </div>
+
+          <div className="lp-aoi-grid">
+            {filteredAoiCards.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', padding: '40px', textStyle: 'center', color: '#94a3b8', background: 'rgba(15,23,42,0.4)', borderRadius: 12 }}>
+                No Indian location matches "{lpSearchQuery}".
               </div>
-            ))}
+            ) : (
+              filteredAoiCards.map(a => (
+                <div key={a.id} className="lp-aoi-card glass-card" onClick={() => onSelectAOI(a.id)}>
+                  <div className="lp-aoi-top">
+                    <span className="lp-aoi-icon">{a.icon}</span>
+                    <span className="lp-aoi-cat">{a.cat}</span>
+                  </div>
+                  <h3 className="lp-aoi-title">{a.title}</h3>
+                  <p className="lp-aoi-desc">{a.desc}</p>
+                  <div className="lp-aoi-meta">
+                    <span><MapPin size={11} /> {a.stats}</span>
+                    <span><Eye size={11} /> {a.range}</span>
+                  </div>
+                  <button className="lp-aoi-btn">
+                    Analyze AOI <ArrowRight size={13} />
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
@@ -581,7 +626,7 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           <div className="lp-research-grid">
             {[
               { badge: 'ORB HOMOGRAPHY', date: '12 MAR 2026', title: 'Autonomous Geospatial Alignment Under Multi-Temporal Orbital Shift', authors: 'Planetary Sensing Group • Dr. A. Kumar, L. Capre', summary: 'Sub-pixel AI homography models enabling automatic satellite image registration without manual ground control points.' },
-              { badge: 'CLOUD FILTERING', date: '25 FEB 2026', title: 'False-Change Suppression in High-Cloud Sentinel-2 Level-2A Observations', authors: 'Defense AI Research Lab • M. Milan, P. Hofmann', summary: 'Contextual neighbourhood analysis and seasonal spectral normalization eliminating shadow and atmospheric change artefacts.' },
+              { badge: 'CLOUD FILTERING', date: '25 FEB 2026', title: 'False-Change Suppression in High-Cloud Sentinel-2 Level-2A Observations', authors: 'RSINTELLI AI Research Lab • M. Milan, P. Hofmann', summary: 'Contextual neighbourhood analysis and seasonal spectral normalization eliminating shadow and atmospheric change artefacts.' },
               { badge: 'DEEP LEARNING', date: '30 JAN 2026', title: 'Multi-Class Semantic Segmentation for Satellite Land-Cover Change Intelligence', authors: 'Remote Sensing Division • L. Sen, S. Roy', summary: 'Deep U-Net and ResNet backbone evaluation for fine-grained multi-class land cover change quantification.' },
             ].map(p => (
               <div key={p.title} className="lp-paper-card glass-card">
@@ -605,10 +650,10 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
           <div className="lp-cta-earth-accent" />
           <div className="lp-cta-content glass-card">
             <div className="lp-section-tag" style={{ marginBottom: 14 }}>THE FUTURE IS BEYOND EARTH</div>
-            <h2>Ready to Launch Satellite<br />Intelligence?</h2>
+            <h2>Ready to Launch 24/7 Satellite<br />Intelligence?</h2>
             <p>Experience real-time multi-temporal change detection, false-change suppression, and automated intelligence reporting — all in one workstation.</p>
             <button className="lp-btn-primary" style={{ margin: '0 auto' }} onClick={onLaunchWorkstation}>
-              LAUNCH DRISHTI WORKSTATION <ArrowRight size={16} />
+              LAUNCH RSINTELLI WORKSTATION <ArrowRight size={16} />
             </button>
           </div>
         </section>
@@ -617,17 +662,17 @@ export default function LandingPage({ onLaunchWorkstation, onSelectAOI, location
         <footer className="lp-footer">
           <div className="lp-footer-inner">
             <div className="lp-footer-brand">
-              <MoDLogoHero />
-              <span className="lp-brand-name">DRISHTI</span>
+              <RSIntelliLogoHero />
+              <span className="lp-brand-name">RSINTELLI</span>
             </div>
-            <p className="lp-footer-tagline">Multi-Temporal Satellite Change Intelligence Engine<br />Powered by Sentinel-2 MSI Level-2A &amp; AI Computer Vision.</p>
+            <p className="lp-footer-tagline">24/7 Multi-Temporal Satellite Change Intelligence Engine<br />Powered by Sentinel-2 MSI Level-2A &amp; AI Computer Vision.</p>
             <div className="lp-footer-links">
               <a href="#mission">Mission</a>
               <a href="#capabilities">Technology</a>
               <a href="#aois">Strategic AOIs</a>
               <a href="#research">Research</a>
             </div>
-            <p className="lp-footer-copy">© 2026 DRISHTI Satellite Intelligence Engine · Ministry of Defence · All rights reserved.</p>
+            <p className="lp-footer-copy">© 2026 RSINTELLI Satellite Intelligence Engine · 24/7 Orbital Observation · All rights reserved.</p>
           </div>
         </footer>
 

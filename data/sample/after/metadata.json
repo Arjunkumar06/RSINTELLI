@@ -1,30 +1,30 @@
 {
   "scene_id": "scene_2026",
   "name": "Guwahati Sentinel-2 Scene (T2 Target)",
-  "acquisition_date": "2026-03-06",
+  "acquisition_date": "2026-05-15",
   "crs": "EPSG:4326",
   "bounds": {
-    "south": 26.121519958547584,
-    "west": 91.71033014987671,
-    "north": 26.168189935132048,
-    "east": 91.76203871467841
+    "south": 26.1446,
+    "west": 91.7366,
+    "north": 26.195800000000002,
+    "east": 91.78779999999999
   },
   "leaflet_bounds": [
     [
-      26.121519958547584,
-      91.71033014987671
+      26.1446,
+      91.7366
     ],
     [
-      26.168189935132048,
-      91.76203871467841
+      26.195800000000002,
+      91.78779999999999
     ]
   ],
   "width": 512,
   "height": 512,
   "bands": 4,
   "resolution_meters": 10.0,
-  "source": "Sentinel-2 MSI Level-2A BOA Surface Reflectance (Copernicus)",
-  "processing_information": "Natural Color RGB Composite, Surface Reflectance Normalized, EPSG:4326 Co-Registered",
+  "source": "Sentinel-2 MSI Level-2A BOA Surface Reflectance",
+  "processing_information": "Orthorectified, Surface Reflectance Normalized, Cloud Masked, EPSG:4326 Co-Registered",
   "preview_path": "data/sample/after/preview.png",
   "geotiff_path": "data/sample/after/scene_2026.tif"
 }

@@ -1372,7 +1372,7 @@ header {
 }
 
 /* ==========================================================================
-   DRISHTI ASTROLAB LANDING PAGE — CINEMATIC GLASSMORPHISM REDESIGN
+   RSINTELLI ASTROLAB LANDING PAGE — CINEMATIC GLASSMORPHISM REDESIGN
    ========================================================================== */
 
 /* ── Root scroll container ── */
@@ -3089,23 +3089,327 @@ header {
   }
 }
 
-@media (max-width: 768px) {
-  .landing-hero-title {
-    font-size: 2.2rem;
-  }
-  .capabilities-grid, .aoi-grid, .research-grid {
-    grid-template-columns: 1fr;
-  }
-  .stats-container {
-    grid-template-columns: 1fr;
-  }
-  .preview-card-grid {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-  .landing-nav-links {
-    display: none;
-  }
+/* ==========================================================================
+   RSINTELLI 24/7 SATELLITE INTELLIGENCE SYSTEM STYLES
+   ========================================================================== */
+
+/* RSINTELLI Header Logo Badge */
+.rsintelli-logo-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
 }
+
+.rsintelli-logo-icon {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 6px #38bdf8);
+}
+
+.rsintelli-live-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+  animation: rsintelliPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes rsintelliPulse {
+  0% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.9); opacity: 0.7; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* 24/7 Top Telemetry Bar */
+.rsintelli-telemetry-bar {
+  background: linear-gradient(90deg, #090e17 0%, #030712 50%, #090e17 100%);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-family: 'Outfit', monospace, sans-serif;
+  padding: 4px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  z-index: 9998;
+}
+
+.telemetry-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.telemetry-label {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}
+
+.telemetry-val {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.telemetry-val.highlight {
+  color: #4ade80;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+/* Spectral Composite Mode Switcher */
+.spectral-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.spectral-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.spectral-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.spectral-btn.active {
+  background: #38bdf8;
+  color: #030712;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* Spectral Filter Overlays for Satellite Raster */
+.spectral-filter-NDVI img,
+.spectral-filter-NDVI canvas,
+.leaflet-container.spectral-filter-NDVI .leaflet-tile {
+  filter: hue-rotate(95deg) saturate(320%) contrast(140%) !important;
+}
+
+.spectral-filter-NDWI img,
+.spectral-filter-NDWI canvas,
+.leaflet-container.spectral-filter-NDWI .leaflet-tile {
+  filter: hue-rotate(185deg) saturate(300%) contrast(150%) !important;
+}
+
+.spectral-filter-NDBI img,
+.spectral-filter-NDBI canvas,
+.leaflet-container.spectral-filter-NDBI .leaflet-tile {
+  filter: hue-rotate(-45deg) saturate(280%) contrast(160%) !important;
+}
+
+/* 24/7 Alert Drawer System */
+.alert-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alert-trigger-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.alert-count-badge {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.62rem;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.alert-drawer-modal {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 360px;
+  max-height: 80vh;
+  background: #090e17;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(56, 189, 248, 0.15);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+
+.alert-drawer-header {
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alert-drawer-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-drawer-body {
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-item-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.alert-item-card:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateX(-2px);
+}
+
+.alert-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.alert-severity-tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.alert-severity-tag.CRITICAL {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.alert-severity-tag.WARNING {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.alert-severity-tag.INFO {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.alert-item-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 2px;
+}
+
+.alert-item-meta {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 24/7 Live Radar Animation */
+.radar-pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160px;
+  height: 160px;
+  margin-top: -80px;
+  margin-left: -80px;
+  border: 2px solid rgba(56, 189, 248, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: radarSweep 3s infinite linear;
+}
+
+@keyframes radarSweep {
+  0% { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* Landing Page Indian Location Search Box */
+.lp-aoi-search-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 32px 0;
+}
+
+.lp-aoi-search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 10px 18px;
+  border-radius: 30px;
+  width: 100%;
+  max-width: 620px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.15);
+  backdrop-filter: blur(12px);
+}
+
+.lp-aoi-search-box input {
+  background: transparent;
+  border: none;
+  color: #f1f5f9;
+  font-size: 0.88rem;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+}
+
+.lp-aoi-search-box input::placeholder {
+  color: #64748b;
+}
+
 
 
