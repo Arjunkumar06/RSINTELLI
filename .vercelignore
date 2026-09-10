@@ -1,0 +1,10 @@
+# Exclude large binary data files and docs from Vercel function bundle
+*.pdf
+*.tif
+*.tiff
+*.jpg
+*.png
+data/sample/**
+data/v2/**
+data/uploads/**
+frontend/node_modules/**

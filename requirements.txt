@@ -1,11 +1,10 @@
-# Backend dependencies for RSINTELLI (Vercel Serverless Ready)
+# Backend dependencies for RSINTELLI (Vercel Serverless Bundle Optimized < 500MB)
 fastapi>=0.110.0
 uvicorn>=0.28.0
 python-multipart>=0.0.9
 rasterio>=1.3.0
 opencv-python-headless>=4.8.0
 shapely>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
+numpy>=1.24.0,<2.0.0
+scikit-learn>=1.3.0,<1.5.0
 pillow>=10.0.0
-scipy>=1.10.0
