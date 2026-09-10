@@ -52,11 +52,21 @@ for d in [UPLOAD_DIR, STATIC_DIR, LOCATIONS_DIR]:
     except Exception:
         pass
 
+FRONTEND_DIST = os.path.abspath(os.path.join(BASE_DIR, "frontend", "dist"))
+FRONTEND_PUBLIC = os.path.abspath(os.path.join(BASE_DIR, "frontend", "public"))
+
 # Mount static directory to serve generated PNGs
 try:
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 except Exception:
     pass
+
+# Mount dist assets if present
+if os.path.exists(os.path.join(FRONTEND_DIST, "assets")):
+    try:
+        app.mount("/assets", StaticFiles(directory=os.path.join(FRONTEND_DIST, "assets")), name="dist_assets")
+    except Exception:
+        pass
 
 @app.on_event("startup")
 def startup_event():
@@ -518,6 +528,45 @@ def export_report(format: str = "geojson", location: str = Query(None)):
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename=change_intelligence{loc_tag}.json"}
         )
+
+@app.get("/")
+def read_root():
+    index_path = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(index_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_path)
+    return {
+        "status": "online",
+        "service": "RSINTELLI 24/7 AI Satellite Intelligence API",
+        "archive_status": "25+ Indian Locations / Multi-Temporal Observations Ready",
+        "documentation": "/docs"
+    }
+
+@app.get("/{filename:path}")
+def serve_static_or_spa(filename: str):
+    # Don't intercept API endpoints
+    if filename.startswith(("locations", "scenes", "changes", "search", "export", "change-detect", "health", "docs", "openapi.json", "static", "api")):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+        
+    # Check if file exists in frontend/dist
+    dist_file = os.path.join(FRONTEND_DIST, filename)
+    if os.path.isfile(dist_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(dist_file)
+        
+    # Check if file exists in frontend/public
+    pub_file = os.path.join(FRONTEND_PUBLIC, filename)
+    if os.path.isfile(pub_file):
+        from fastapi.responses import FileResponse
+        return FileResponse(pub_file)
+        
+    # Default SPA fallback to index.html for React router / client paths
+    index_path = os.path.join(FRONTEND_DIST, "index.html")
+    if os.path.exists(index_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(index_path)
+        
+    raise HTTPException(status_code=404, detail="Not Found")
 
 if __name__ == '__main__':
     import uvicorn
