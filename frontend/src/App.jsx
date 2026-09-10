@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, ImageOverlay, GeoJSON, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, ImageOverlay, GeoJSON, ZoomControl, useMap, useMapEvents } from 'react-leaflet';
 import { 
   Menu,
   X,
@@ -436,8 +436,11 @@ function AppContent() {
       const locRes = await fetch(`${API_BASE}/locations`);
       if (locRes.ok) {
         const locData = await locRes.json();
-        if (Array.isArray(locData)) {
+        if (Array.isArray(locData) && locData.length > 0) {
           setLocations(locData);
+          if (!selectedLocId) {
+            applyLocation(locData[0]);
+          }
         }
       }
     } catch (err) {
@@ -472,19 +475,22 @@ function AppContent() {
       setMapCenter([loc.center[0], loc.center[1]]);
       setMapZoom(14);
     }
+
+    if (loc.reference_scene && loc.target_scene) {
+      setScenes([loc.reference_scene, loc.target_scene]);
+      setBeforeSceneId(loc.reference_scene.id);
+      setAfterSceneId(loc.target_scene.id);
+    }
     
     try {
       const res = await fetch(`${API_BASE}/scenes?location=${loc.location_id}`);
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setScenes(data);
           if (data.length >= 2) {
             setBeforeSceneId(data[0].id || data[0].scene_id || '');
             setAfterSceneId(data[1].id || data[1].scene_id || '');
-          } else if (data.length > 0) {
-            setBeforeSceneId(data[0].id || data[0].scene_id || '');
-            setAfterSceneId(data[0].id || data[0].scene_id || '');
           }
         }
       }
@@ -1164,31 +1170,26 @@ function AppContent() {
                 </div>
               ) : isConceptDemo ? (
                 <DemoCanvas mode="before" />
-              ) : scenesLoading ? (
-                <div className="map-placeholder">
-                  <span className="spinner" />
-                  <span>LOADING SATELLITE IMAGERY...</span>
-                </div>
-              ) : beforeImgUrl ? (
+              ) : (
                 <MapContainer 
                   center={mapCenter} 
                   zoom={mapZoom} 
-                  minZoom={12}
+                  minZoom={10}
                   maxZoom={18}
                   zoomControl={false} 
                   className="demo-scene-canvas"
                 >
-                  <ImageOverlay url={beforeImgUrl} bounds={currentBounds} />
+                  <TileLayer 
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    maxZoom={18}
+                    attribution="&copy; Esri, Maxar, Sentinel-2"
+                  />
+                  {beforeImgUrl && <ImageOverlay url={beforeImgUrl} bounds={currentBounds} opacity={0.85} />}
                   <MapBoundsFitter bounds={currentBounds} />
                   <MapResizer isSidebarOpen={isSidebarOpen} selectedChange={selectedChange} />
                   <MapSynchronizer center={mapCenter} zoom={mapZoom} onMapMoved={(c, z) => { setMapCenter(c); setMapZoom(z); }} />
                   <ZoomControl position="bottomright" />
                 </MapContainer>
-              ) : (
-                <div className="map-placeholder">
-                  <AlertCircle size={16} style={{ color: '#38bdf8', marginBottom: 6 }} />
-                  <span>Imagery unavailable for this selection</span>
-                </div>
               )}
             </div>
           </div>
@@ -1296,21 +1297,23 @@ function AppContent() {
                   showMask={false} 
                   appliedCategories={appliedCategories}
                 />
-              ) : scenesLoading ? (
-                <div className="map-placeholder">
-                  <span className="spinner" />
-                  <span>LOADING SATELLITE IMAGERY...</span>
-                </div>
-              ) : (alignedImgUrl || afterImgUrl) ? (
+              ) : (
                 <MapContainer 
                   center={mapCenter} 
                   zoom={mapZoom} 
-                  minZoom={12}
+                  minZoom={10}
                   maxZoom={18}
                   zoomControl={false} 
                   className="demo-scene-canvas"
                 >
-                  <ImageOverlay url={alignedImgUrl || afterImgUrl || beforeImgUrl} bounds={currentBounds} opacity={1.0} />
+                  <TileLayer 
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    maxZoom={18}
+                    attribution="&copy; Esri, Maxar, Sentinel-2"
+                  />
+                  {(alignedImgUrl || afterImgUrl || beforeImgUrl) && (
+                    <ImageOverlay url={alignedImgUrl || afterImgUrl || beforeImgUrl} bounds={currentBounds} opacity={0.85} />
+                  )}
                   
                   {visibleOverlayChanges.map((change, idx) => (
                     <GeoJSON 
@@ -1326,11 +1329,6 @@ function AppContent() {
                   <MapSynchronizer center={mapCenter} zoom={mapZoom} onMapMoved={(c, z) => { setMapCenter(c); setMapZoom(z); }} />
                   <ZoomControl position="bottomright" />
                 </MapContainer>
-              ) : (
-                <div className="map-placeholder">
-                  <AlertCircle size={16} style={{ color: '#38bdf8', marginBottom: 6 }} />
-                  <span>Imagery unavailable for this selection</span>
-                </div>
               )}
             </div>
 
