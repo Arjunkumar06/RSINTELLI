@@ -1,8 +1,14 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "frontend/dist",
   "rewrites": [
     {
       "source": "/(locations|scenes|changes|search|export|change-detect|docs|health|openapi.json|api/.*|static/.*)",
       "destination": "/backend/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
