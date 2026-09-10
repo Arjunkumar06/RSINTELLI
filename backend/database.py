@@ -1,72 +1,92 @@
 import sqlite3
 import json
 import os
+import shutil
 
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'satellite.db'))
+IS_VERCEL = os.environ.get('VERCEL') == '1' or os.environ.get('VERCEL_ENV') is not None
+
+def get_db_path():
+    orig_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'satellite.db'))
+    if IS_VERCEL:
+        tmp_path = '/tmp/satellite.db'
+        if not os.path.exists(tmp_path):
+            if os.path.exists(orig_path):
+                try:
+                    shutil.copy2(orig_path, tmp_path)
+                except Exception:
+                    return orig_path
+            else:
+                return tmp_path
+        return tmp_path
+    return orig_path
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    db_p = get_db_path()
+    conn = sqlite3.connect(db_p)
     conn.row_factory = sqlite3.Row
     return conn
 
 def init_db():
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Check if scenes table exists and has location_id
-    cursor.execute("PRAGMA table_info(scenes)")
-    scene_cols = [row['name'] for row in cursor.fetchall()]
-    if 'location_id' not in scene_cols:
-        cursor.execute("DROP TABLE IF EXISTS scenes")
-
-    # Create scenes table
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS scenes (
-        id TEXT PRIMARY KEY,
-        location_id TEXT DEFAULT 'mixed',
-        name TEXT,
-        file_path TEXT,
-        mask_path TEXT,
-        date TEXT,
-        crs TEXT,
-        transform TEXT,
-        bounds TEXT,
-        width INTEGER DEFAULT 512,
-        height INTEGER DEFAULT 512,
-        resolution REAL DEFAULT 10.0
-    )
-    ''')
-    
-    # Check if changes table exists and has location_id
-    cursor.execute("PRAGMA table_info(changes)")
-    columns = [row['name'] for row in cursor.fetchall()]
-    if 'location_id' not in columns:
-        cursor.execute("DROP TABLE IF EXISTS changes")
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
         
-    # Create changes table with all GIS context fields
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS changes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        location_id TEXT DEFAULT 'mixed',
-        type TEXT,
-        confidence REAL,
-        area_pixels INTEGER,
-        area_sqm INTEGER DEFAULT 0,
-        centroid TEXT,
-        distance_to_road_m REAL DEFAULT 0.0,
-        distance_to_water_m REAL DEFAULT 0.0,
-        explanation TEXT DEFAULT '',
-        geometry TEXT,
-        bbox TEXT,
-        pixel_bbox TEXT,
-        dates TEXT,
-        suppression_checks TEXT,
-        relevance REAL DEFAULT 0.0
-    )
-    ''')
-    
-    conn.commit()
-    conn.close()
+        # Check if scenes table exists and has location_id
+        cursor.execute("PRAGMA table_info(scenes)")
+        scene_cols = [row['name'] for row in cursor.fetchall()]
+        if 'location_id' not in scene_cols:
+            cursor.execute("DROP TABLE IF EXISTS scenes")
+
+        # Create scenes table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS scenes (
+            id TEXT PRIMARY KEY,
+            location_id TEXT DEFAULT 'mixed',
+            name TEXT,
+            file_path TEXT,
+            mask_path TEXT,
+            date TEXT,
+            crs TEXT,
+            transform TEXT,
+            bounds TEXT,
+            width INTEGER DEFAULT 512,
+            height INTEGER DEFAULT 512,
+            resolution REAL DEFAULT 10.0
+        )
+        ''')
+        
+        # Check if changes table exists and has location_id
+        cursor.execute("PRAGMA table_info(changes)")
+        columns = [row['name'] for row in cursor.fetchall()]
+        if 'location_id' not in columns:
+            cursor.execute("DROP TABLE IF EXISTS changes")
+            
+        # Create changes table with all GIS context fields
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS changes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            location_id TEXT DEFAULT 'mixed',
+            type TEXT,
+            confidence REAL,
+            area_pixels INTEGER,
+            area_sqm INTEGER DEFAULT 0,
+            centroid TEXT,
+            distance_to_road_m REAL DEFAULT 0.0,
+            distance_to_water_m REAL DEFAULT 0.0,
+            explanation TEXT DEFAULT '',
+            geometry TEXT,
+            bbox TEXT,
+            pixel_bbox TEXT,
+            dates TEXT,
+            suppression_checks TEXT,
+            relevance REAL DEFAULT 0.0
+        )
+        ''')
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"init_db safe catch: {e}")
 
 def save_scene(scene_id, location_id, name, file_path, mask_path, date, crs, transform, bounds=None, width=512, height=512, resolution=10.0):
     conn = get_db()
