@@ -1,2 +1,20 @@
+[project]
+name = "rsintelli"
+version = "0.1.0"
+description = "RSINTELLI 24/7 AI Satellite Intelligence API"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "python-multipart>=0.0.9",
+    "rasterio>=1.3.0",
+    "opencv-python-headless>=4.8.0",
+    "shapely>=2.0.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "pillow>=10.0.0",
+    "scipy>=1.10.0"
+]
+
 [tool.vercel]
 entrypoint = "backend.main:app"
